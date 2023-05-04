@@ -11,7 +11,7 @@ def check(need: list, got: list, mode: str) -> bool:
 
     - All Without Order (AWO) - режим, при котором нужно получить все результаты, но порядок не важен - реализован как сравнение множеств на списках;
 
-    - One From List - режим, при котором нужно вывести m вариантов из n возможных (причем n > m) - проверка на вхождение элементов списка во множество;
+    - One From List (OFL) - режим, при котором нужно вывести m вариантов из n возможных (причем n > m) - проверка на вхождение элементов списка во множество;
 
     """
 
@@ -33,10 +33,15 @@ def get_tests(name: str, tests: list, mode: str):
 
         fin = open(test + '.in', 'r')
         fout = open(test + '.out', 'r')
+        f_input = open('input.txt', 'w')
+
+        input_text = fin.readlines()
+        for str in input_text:
+            f_input.write(str)
 
         p = subprocess.Popen(['python', name], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         p.text_mode = True
-        output, _ = p.communicate(''.join(fin.readlines()).encode())
+        output, _ = p.communicate(''.join(input_text).encode())
 
         need = [''.join(fout.readlines()).encode()]
         got = [output.strip()]
@@ -44,7 +49,14 @@ def get_tests(name: str, tests: list, mode: str):
         need = [line.decode().split() for line in need]
         got = [line.decode().split() for line in got]
 
-        assert check(need, got, 'AIO'), f'Test {test} failed! Need: {str(*need)}, got: {str(*got)}'
+        f_output = open('output.txt', 'r')
+
+        got_file = [[' '.join(line.split())] for line in f_output.readlines()]
+
+        if got[0]:
+            assert check(need, got, 'AIO'), f'Test {test} failed! Need: {need}, got: {got}'
+        else:
+            assert check(need, got_file, 'AIO'), f'Test {test} failed! Need: {need}, got: {got_file}'
 
 
 get_tests("main.py", ['1'], 'AIO')
